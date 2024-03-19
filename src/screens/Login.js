@@ -11,7 +11,10 @@ import {
 import { auth } from "../../firebase.config";
 
 // importando a função de login com e-mail e senha
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 import { useState } from "react";
 
@@ -21,7 +24,7 @@ export default function Login({ navigation }) {
 
   const login = async () => {
     if (!email || !senha) {
-      Alert.alert("atenção", "Preencha o email e senha");
+      Alert.alert("Atenção", "Preencha o email e senha");
       Vibration.vibrate(300);
       return;
     }
@@ -31,6 +34,29 @@ export default function Login({ navigation }) {
       navigation.replace("AreaLogada");
     } catch (error) {
       console.error(error.code);
+      let mensagem;
+      switch (error.code) {
+        case "auth/invalid-credential":
+          mensagem = "Dados inválidos!";
+          break;
+        case "auth/invalid-email":
+          mensagem = "Endereço de e-mail inválido!";
+          break;
+        default:
+          mensagem = "Houve um erro, tente mais tarde!";
+          break;
+      }
+      Alert.alert("Ops!", mensagem);
+    }
+  };
+
+  // anfn
+  const recuperarSenha = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert("Recuperar senha", "Verifique sua caixa de e-mails.");
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -50,6 +76,11 @@ export default function Login({ navigation }) {
         />
         <View style={estilos.botoes}>
           <Button onPress={login} title="Entre" color="green" />
+          <Button
+            title="Recuperar senha"
+            color={"grey"}
+            onPress={recuperarSenha}
+          />
         </View>
       </View>
     </View>
