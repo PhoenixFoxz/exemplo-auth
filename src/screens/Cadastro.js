@@ -1,28 +1,77 @@
 import { useState } from "react";
 import { Alert, Button, StyleSheet, TextInput, View } from "react-native";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase.config";
 
 export default function Cadastro({ navigation }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [nome, setNome] = useState("");
 
   const cadastrar = async () => {
-    if (!email || !senha) {
-      Alert.alert("Atenção!", "Preencha e-mail e senha!");
+    if (!email || !senha || !nome) {
+      Alert.alert("Atenção!", "Preencha nome, e-mail e senha!");
       return;
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, senha);
+      const contaUsuario = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        senha
+      );
+      if (contaUsuario.user) {
+        await updateProfile(auth.currentUser, { displayName: nome });
+        console.log(contaUsuario.user.displayName);
+      }
+
+      Alert.alert("Cadastro", "Seu cadastro foi concluído com sucesso!", [
+        {
+          style: "cancel",
+          text: "Ficar aqui mesmo",
+          onPress: () => {
+            return;
+          },
+        },
+        {
+          style: "default",
+          text: "Ir para a área logada",
+          onPress: () => navigation.replace("AreaLogada"),
+        },
+      ]);
     } catch (error) {
       console.error(error.code);
+      let mensagem;
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          mensagem = "E-mail já cadastrado!";
+          break;
+        case "auth/weak-password":
+          mensagem = "Senha fraca (mínimo de 6 caracteres)";
+          break;
+        case "auth/invalid-credential":
+          mensagem = "Dados inválidos!";
+          break;
+        case "auth/invalid-email":
+          mensagem = "Endereço de e-mail inválido!";
+          break;
+        default:
+          mensagem = "Houve um erro, tente mais tarde!";
+          break;
+      }
+      Alert.alert("Ops!", mensagem);
     }
   };
 
   return (
     <View style={estilos.container}>
       <View style={estilos.formulario}>
+        <TextInput
+          placeholder="Nome"
+          style={estilos.input}
+          keyboardType="default"
+          onChangeText={(valor) => setNome(valor)}
+        />
         <TextInput
           placeholder="E-mail"
           style={estilos.input}
