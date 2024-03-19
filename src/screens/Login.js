@@ -66,6 +66,7 @@ export default function Login({ navigation }) {
         <TextInput
           onChangeText={(valor) => setEmail(valor)}
           placeholder="E-mail"
+          keyboardType="email-address"
           style={estilos.input}
         />
         <TextInput
