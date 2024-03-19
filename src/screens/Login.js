@@ -15,7 +15,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { useState } from "react";
 
-export default function Login() {
+export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
@@ -23,9 +23,15 @@ export default function Login() {
     if (!email || !senha) {
       Alert.alert("atenção", "Preencha o email e senha");
       Vibration.vibrate(300);
+      return;
     }
-
-    console.log(email, senha);
+    try {
+      await signInWithEmailAndPassword(auth, email, senha);
+      console.log("Login feito com sucesso!");
+      navigation.replace("AreaLogada");
+    } catch (error) {
+      console.error(error.code);
+    }
   };
 
   return (
