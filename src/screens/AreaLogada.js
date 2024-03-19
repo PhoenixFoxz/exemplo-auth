@@ -4,7 +4,7 @@ import { signOut } from "firebase/auth";
 
 export default function AreaLogada({ navigation }) {
   // Acessando dados do usuário logado
-  console.log(auth.currentUser);
+  // console.log(auth.currentUser);
 
   const { email } = auth.currentUser;
   console.log(email);
